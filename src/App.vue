@@ -3,7 +3,7 @@
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <div class="navbar-header">
-          <router-link :to="{path: '/'}" class="navbar-brand">Fund</router-link>
+          <router-link :to="{path: '/'}" class="navbar-brand">JumpStarter</router-link>
         </div>
         <ul class="nav navbar-nav">
           <li><router-link :to="{path: '/projects'}">Explore</router-link></li>

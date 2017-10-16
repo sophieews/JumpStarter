@@ -9,7 +9,7 @@
                                 <form id="login-form" role="form" style="display: block;" v-on:submit.prevent>
                                     <h2>Create a new project</h2>
                                     <div class="form-group">
-                                        <input name="username" v-model="username" tabindex="1" class="form-control" placeholder="Title">
+                                        <input name="username" v-model="title" tabindex="1" class="form-control" placeholder="Title">
                                     </div>
                                     <div class="form-group">
                                         <input name="subtitle" v-model="subtitle" tabindex="2" class="form-control" placeholder="Subtitle">
@@ -24,10 +24,14 @@
                                         <input name="target" v-model="target" tabindex="5" class="form-control" placeholder="Funding target">
                                     </div>
                                     <div class="form-group">
-                                        <input type="file" name="filename" v-model="image" tabindex="6" class="form-control" accept="image/jpeg, image/png">
+                                        <h5>Upload an image:</h5>
+                                        <input type="file" @change="previewImage" accept="image/png, image/jpeg">
+                                    </div>
+                                    <div v-if="image.length > 0">
+                                        <img class="preview" :src="image">
                                     </div>
                                     <div class="col-xs-6 form-group pull-right">
-                                        <input type="submit" tabindex="3" class="form-control btn btn-login">
+                                        <input type="submit" tabindex="6" v-on:click="createProject" class="form-control btn btn-login">
                                     </div>
                                 </form>
                             </div>
@@ -54,7 +58,8 @@
                 subtitle: "",
                 description: "",
                 rewards: "",
-                target: ""
+                target: "",
+                image: ""
             }
         },
 
@@ -68,7 +73,7 @@
             createProject: function() {
                 const options = {
                     headers: {
-                        'X-Authorization': 'dfc94c3f5d5a0ec74db962c261023d75',
+                        'X-Authorization': '888ec9862977f75df8f595a4b1cf9911',
                         'Content-Type': 'application/json'
                     }
                 };
@@ -88,23 +93,26 @@
                             "description": "reward description and stuff"
                         }
                     ]
-                }
+                };
 
                 this.$http.post('http://localhost:4941/api/v2/projects', body, options)
                     .then(function(response) {
                         console.log("Success")
                         console.log(response)
                     }, function(error) {
-//                        if(error.status === 401) {
-//                            this.unauthorisedFlag = true;
-//                            this.forbiddenFlag = false;
-//                        }
-//                        if(error.status === 403) {
-//                            this.forbiddenFlag = true;
-//                            this.unauthorisedFlag = false;
-//                        }
                         this.error = error;
                     });
+            },
+
+            previewImage: function(event) {
+                var input = event.target;
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.image = e.target.result;
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
             }
         }
 
@@ -143,6 +151,9 @@
         margin: 0 auto;
         width: 80%;
     }
-
+    img.preview {
+        width: 200px;
+        padding: 5px;
+    }
 </style>
 
