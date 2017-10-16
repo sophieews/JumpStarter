@@ -9,19 +9,22 @@
                                 <form id="login-form" role="form" style="display: block;" v-on:submit.prevent>
                                     <h2>Create a new project</h2>
                                     <div class="form-group">
-                                        <input type="text" name="username" tabindex="1" class="form-control" placeholder="Title">
+                                        <input name="username" v-model="username" tabindex="1" class="form-control" placeholder="Title">
                                     </div>
                                     <div class="form-group">
-                                        <input type="password" name="subtitle" tabindex="2" class="form-control" placeholder="Subtitle">
+                                        <input name="subtitle" v-model="subtitle" tabindex="2" class="form-control" placeholder="Subtitle">
                                     </div>
                                     <div class="form-group">
-                                        <input type="password" name="description" tabindex="2" class="form-control" placeholder="Description">
+                                        <input name="description" v-model="description" tabindex="3" class="form-control" placeholder="Description">
                                     </div>
                                     <div class="form-group">
-                                        <input type="password" name="rewards" tabindex="2" class="form-control" placeholder="Rewards">
+                                        <input name="rewards" v-model="rewards" tabindex="4" class="form-control" placeholder="Rewards">
                                     </div>
                                     <div class="form-group">
-                                        <input type="password" name="target" tabindex="2" class="form-control" placeholder="Funding target">
+                                        <input name="target" v-model="target" tabindex="5" class="form-control" placeholder="Funding target">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="file" name="filename" v-model="image" tabindex="6" class="form-control" accept="image/jpeg, image/png">
                                     </div>
                                     <div class="col-xs-6 form-group pull-right">
                                         <input type="submit" tabindex="3" class="form-control btn btn-login">
@@ -46,7 +49,12 @@
         data (){
             return {
                 error: "",
-                errorFlag: false
+                errorFlag: false,
+                title: "",
+                subtitle: "",
+                description: "",
+                rewards: "",
+                target: ""
             }
         },
 
@@ -57,17 +65,47 @@
         }),
 
         methods: {
-//            getUserProjects: function() {
-//                const state = this.getState;
-//                this.$http.get('http://localhost:4941/api/v2/projects?creator=' + 1)
-//                    .then(function(response) {
-//                        this.empty = response.body.length < 1;
-//                        this.userProjects = response.data;
-//                    }, function(error) {
-//                        this.error = error;
-//                        this.errorFlag = true;
-//                    });
-//            }
+            createProject: function() {
+                const options = {
+                    headers: {
+                        'X-Authorization': 'dfc94c3f5d5a0ec74db962c261023d75',
+                        'Content-Type': 'application/json'
+                    }
+                };
+                const body = {
+                    "title": "project a",
+                    "subtitle": "project subtitle",
+                    "description": "project description",
+                    "target": 10000,
+                    "creators": [
+                        {
+                            "id": 3
+                        }
+                    ],
+                    "rewards": [
+                        {
+                            "amount": 10,
+                            "description": "reward description and stuff"
+                        }
+                    ]
+                }
+
+                this.$http.post('http://localhost:4941/api/v2/projects', body, options)
+                    .then(function(response) {
+                        console.log("Success")
+                        console.log(response)
+                    }, function(error) {
+//                        if(error.status === 401) {
+//                            this.unauthorisedFlag = true;
+//                            this.forbiddenFlag = false;
+//                        }
+//                        if(error.status === 403) {
+//                            this.forbiddenFlag = true;
+//                            this.unauthorisedFlag = false;
+//                        }
+                        this.error = error;
+                    });
+            }
         }
 
     }
