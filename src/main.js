@@ -9,7 +9,8 @@ import Projects from './Projects.vue';
 import ProjectDetails from './ProjectDetails.vue';
 import SignIn from './SignIn.vue';
 import Pledge from './Pledge.vue';
-import Manage from './Manage.vue';
+import MyProjects from './MyProjects.vue';
+import EditProject from './EditProject.vue';
 import Create from './Create.vue';
 import { store } from './store/store'
 
@@ -45,9 +46,14 @@ const routes = [
         component: Pledge
     },
     {
-        path: "/manage",
-        name: "manage",
-        component: Manage
+        path: "/myProjects",
+        name: "myProjects",
+        component: MyProjects
+    },
+    {
+        path: "/myProjects/edit",
+        name: "edit",
+        component: EditProject
     },
     {
         path: "/create",

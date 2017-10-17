@@ -8,7 +8,7 @@
         <ul class="nav navbar-nav">
           <li><router-link :to="{path: '/projects'}">Explore</router-link></li>
           <li v-if="$store.state.loggedIn === true"><router-link :to="{path: '/create'}">Create</router-link></li>
-          <li v-if="$store.state.loggedIn === true"><router-link :to="{path: '/manage'}">My Projects</router-link></li>
+          <li v-if="$store.state.loggedIn === true"><router-link :to="{path: '/myProjects'}">My Projects</router-link></li>
           <li v-if="$store.state.loggedIn === false"><router-link :to="{path: '/signIn'}">Login</router-link></li>
           <li v-if="$store.state.loggedIn === true" v-on:click="logout"><router-link :to="{path: '/signIn'}">Logout</router-link></li>
         </ul>

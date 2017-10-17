@@ -1,5 +1,5 @@
 <template>
-    <div id="manage">
+    <div id="myProjects">
         <div class="container">
             <h2 style="text-align: center;">Manage your projects</h2>
             <h4 style="text-align: center">Manage, update and delete your current projects</h4>
@@ -21,7 +21,9 @@
                     <div class="col-md-8">
                         <h3>{{ project.title }}</h3>
                         <p>{{ project.subtitle }}</p>
-                        <a class="btn btn-primary" href="#">Edit Project</a>
+                        <router-link :to="{ name: 'edit', params: { id: project.id}}">
+                            <a class="btn btn-primary">Edit Project</a>
+                        </router-link>
                     </div>
             </div>
 
@@ -56,7 +58,7 @@
         methods: {
             getUserProjects: function() {
                 const state = this.getState;
-                this.$http.get('http://localhost:4941/api/v2/projects?creator=' + 1)
+                this.$http.get('http://localhost:4941/api/v2/projects?creator=' + state.id)
                     .then(function(response) {
                         this.empty = response.body.length < 1;
                         this.userProjects = response.data;

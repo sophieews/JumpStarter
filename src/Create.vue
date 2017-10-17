@@ -9,7 +9,7 @@
                                 <form id="login-form" role="form" style="display: block;" v-on:submit.prevent>
                                     <h2>Create a new project</h2>
                                     <div class="form-group">
-                                        <input name="username" v-model="title" tabindex="1" class="form-control" placeholder="Title">
+                                        <input name="title" v-model="title" tabindex="1" class="form-control" placeholder="Title">
                                     </div>
                                     <div class="form-group">
                                         <input name="subtitle" v-model="subtitle" tabindex="2" class="form-control" placeholder="Subtitle">
@@ -21,11 +21,11 @@
                                         <input name="rewards" v-model="rewards" tabindex="4" class="form-control" placeholder="Rewards">
                                     </div>
                                     <div class="form-group">
-                                        <input name="target" v-model="target" tabindex="5" class="form-control" placeholder="Funding target">
+                                        <input type="number" name="target" v-model="target" tabindex="5" class="form-control" placeholder="Funding target">
                                     </div>
                                     <div class="form-group">
                                         <h5>Upload an image:</h5>
-                                        <input type="file" @change="previewImage" accept="image/png, image/jpeg">
+                                        <input type="file" @change="setImage" accept="image/png, image/jpeg">
                                     </div>
                                     <div v-if="image.length > 0">
                                         <img class="preview" :src="image">
@@ -58,8 +58,9 @@
                 subtitle: "",
                 description: "",
                 rewards: "",
-                target: "",
-                image: ""
+                target: 0,
+                image: "",
+                projectId: null
             }
         },
 
@@ -67,24 +68,26 @@
         },
 
         computed: mapGetters({
+            getState: 'getState'
         }),
 
         methods: {
             createProject: function() {
-                const options = {
+                const state = this.getState;
+                const projectOptions = {
                     headers: {
-                        'X-Authorization': '888ec9862977f75df8f595a4b1cf9911',
+                        'X-Authorization': state.token,
                         'Content-Type': 'application/json'
                     }
                 };
-                const body = {
-                    "title": "project a",
-                    "subtitle": "project subtitle",
-                    "description": "project description",
-                    "target": 10000,
+                const projectBody = {
+                    "title": this.title,
+                    "subtitle": this.subtitle,
+                    "description": this.description,
+                    "target": parseInt(this.target),
                     "creators": [
                         {
-                            "id": 3
+                            "id": state.id
                         }
                     ],
                     "rewards": [
@@ -95,24 +98,35 @@
                     ]
                 };
 
-                this.$http.post('http://localhost:4941/api/v2/projects', body, options)
+
+
+                const imageOptions = {
+                    headers: {
+                        'X-Authorization': state.token,
+                        'Content-Type': this.image.type
+                    }
+                };
+
+
+
+                this.$http.post('http://localhost:4941/api/v2/projects', projectBody, projectOptions)
                     .then(function(response) {
                         console.log("Success")
                         console.log(response)
+                        this.$http.put('http://localhost:4941/api/v2/projects/' + response.body.id + '/image' , this.image, imageOptions)
+                            .then(function(response) {
+                                console.log("Success");
+                                console.log(response)
+                            }, function(error) {
+                                this.error = error;
+                            });
                     }, function(error) {
                         this.error = error;
                     });
             },
 
-            previewImage: function(event) {
-                var input = event.target;
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.image = e.target.result;
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
+            setImage: function(event) {
+                this.image = event.target.files[0]
             }
         }
 
