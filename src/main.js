@@ -1,8 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueResource from 'vue-resource';
-import moment from "moment";
-import VueMomentJS from "vue-momentjs";
 import App from './App.vue';
 import Home from './Home.vue';
 import Projects from './Projects.vue';
@@ -13,12 +11,13 @@ import MyProjects from './MyProjects.vue';
 import EditProject from './EditProject.vue';
 import Create from './Create.vue';
 import { store } from './store/store'
+import VuePaginate from 'vue-paginate';
 
 
 
 Vue.use(VueRouter);
 Vue.use(VueResource);
-Vue.use(VueMomentJS, moment);
+Vue.use(VuePaginate);
 
 const routes = [
     {

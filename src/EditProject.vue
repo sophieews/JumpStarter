@@ -10,22 +10,26 @@
 
             <div class="col-sm-12 col-md-7">
                 <div style="max-height: 70%; overflow: hidden">
-                    <img class="img-responsive" v-bind:src="'http://localhost:4941/api/v2/projects/' + this.$route.params.id +'/image'">
+                    <img class="img-responsive" v-bind:src="'http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + this.$route.params.id +'/image'">
                 </div>
             </div>
 
             <div class="col-sm-12 col-md-5">
                 <form id="login-form" role="form" style="display: block;" v-on:submit.prevent>
                     <h1>{{ this.projectDetails.title }}</h1>
-                    <input name="title" v-model="title" tabindex="1" class="form-control" placeholder="{{ this.projectDetails.title}}">
                     <h3>{{ this.projectDetails.subtitle }}</h3>
                     <p>{{ this.projectDetails.description }}</p>
-                    <p>Target: ${{ this.projectDetails.target }}</p>
-                    <p>Rewards:</p>
-                    <div v-for="reward in this.rewards">
-                        <p>$ {{ reward.amount }}</p>
-                        <p>{{ reward.description }}</p>
-                        <p>----------------------------</p>
+                    <p v-if="this.projectDetails.open === true" style="color: #029f5b">Open</p>
+                    <p v-if="this.projectDetails.open === false" style="color: indianred">Closed</p>
+                    <div class="form-group">
+                        <h5>Upload an image:</h5>
+                        <input type="file" @change="setImage" accept="image/png, image/jpeg">
+                    </div>
+                    <div v-if="this.projectDetails.open === true">
+                        <input type="checkbox" id="close" name="close" value="close"> Close project <br>
+                    </div>
+                    <div class="col-xs-6 form-group pull-right">
+                        <input type="submit" tabindex="6" v-on:click="updateProject" class="form-control btn btn-login">
                     </div>
                 </form>
             </div>
@@ -51,22 +55,23 @@
                     title: "",
                     subtitle: "",
                     description: "",
-                    creationDate: 0,
-                    open: null,
                     imageUri: "",
-                    target: 0
+                    open: ""
                 },
-                creators: [],
-                rewards: [],
-                currentPledged: 0,
-                numberOfBackers: 0,
-                backers: []
+                open: false,
+                image: null
             }
         },
 
         mounted: function() {
-            this.getProject();
+            this.getProject(this.$route.params.id)
+                .then(success => {
+                    if(success) {
+                        this.projectDetails.imageUri = this.getImage(this.projectDetails.id)
+                    }
+                })
         },
+
 
         computed: mapGetters({
             getState: 'getState'
@@ -74,47 +79,68 @@
 
         methods: {
             getProject: function() {
-                this.$http.get('http://localhost:4941/api/v2/projects/' + this.$route.params.id)
+                this.$http.get('http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + this.$route.params.id)
                     .then(function(response) {
                         this.projectDetails.id = response.body.id;
                         this.projectDetails.title = response.body.title;
                         this.projectDetails.subtitle = response.body.subtitle;
-                        this.projectDetails.description = response.body.description;
-                        this.projectDetails.creationDate = moment.unix(response.body.creationDate).format('dddd MMMM Do YYYY, h:mm:ss a');
                         this.projectDetails.open = response.body.open;
                         this.projectDetails.imageUri = response.body.imageUri;
-                        this.projectDetails.target = response.body.target;
-                        this.currentPledged = response.body.progress.currentPledged;
-                        this.numberOfBackers = response.body.progress.numberOfBackers;
-                        for (var i = 0; i < response.body.creators.length; i++) {
-                            this.creators.push(response.body.creators[i]);
-                        }
-                        for(var j = 0; j < response.body.rewards.length; j++) {
-                            this.rewards.push(response.body.rewards[j]);
-                        }
-                        for(var k = 0; k < response.body.backers.length; k++) {
-                            this.backers.push(response.body.backers[k]);
-                        }
+                        this.projectDetails.open = response.body.open;
                     }, function(error) {
                         this.error = error;
                         this.errorFlag = true;
                     });
             },
 
-            turnTextIntoInputField: function(inputId, tagType) {
-                console.log(inputId);
-                var inputIdWithHash = "#" + inputId;
-                var elementValue = $(inputIdWithHash).text();
-                $(inputIdWithHash).replaceWith('<input name="test" id="' + inputId + '" type="text" value="' + elementValue + '">');
-                $(document).click(function (event) {
-                    if (!$(event.target).closest(inputIdWithHash).length) {
-                        $(document).unbind('click');
-                        var value = $(inputIdWithHash).val();
-                        console.log('<' + tagType + ' id="' + inputId + '" v-on:click="turnTextIntoInputField(\'' + inputId + '\', \'' + tagType + '\')">' + value + '<' + tagType + '/>')
-                        $(inputIdWithHash).replaceWith('<' + tagType + ' id="' + inputId + '" v-on:click="turnTextIntoInputField(\'' + inputId + '\', \'' + tagType + '\')">' + value + '<' + tagType + '/>');
+            updateStatus: function() {
+                const body = {
+                    "open": !document.getElementById("close").checked
+                };
+                this.$http.put('http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + this.$route.params.id, body, this.$store.getters.getHeaders)
+                    .then(function(response) {
+                        console.log(response)
+                    }, function(error) {
+                        this.error = error;
+                        this.errorFlag = true;
+                    });
+            },
+
+            updateImage: function() {
+                const imageOptions = {
+                    headers: {
+                        'X-Authorization': this.$store.getters.getState.token,
+                        'Content-Type': this.image.type
                     }
-                });
-            }
+                };
+                this.$http.put('http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + this.$route.params.id + '/image', this.image, imageOptions)
+                    .then(function(response) {
+                        console.log(response)
+                    }, function(error) {
+                        this.error = error;
+                        this.errorFlag = true;
+                    });
+            },
+
+            updateProject: function() {
+
+                if(document.getElementById("close") !== null) {
+                    this.updateStatus();
+                }
+                this.updateImage();
+
+                this.$router.push({name: 'myProjects'})
+
+            },
+
+            setImage: function(event) {
+                this.image = event.target.files[0]
+                this.updateImage()
+            },
+
+            getImage: function (id) {
+                return 'http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + id + `/image?time=${Date.now()}`
+            },
         }
 
     }

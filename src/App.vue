@@ -38,7 +38,7 @@
     methods: {
         logout: function() {
             const options = this.getHeaders;
-            this.$http.post('http://localhost:4941/api/v2/users/logout', {}, options)
+            this.$http.post('http://csse-s365.canterbury.ac.nz:4817/api/v2/users/logout', {}, options)
                 .then(function(response) {
                     this.$store.commit('logout', response.body);
                     console.log(response);

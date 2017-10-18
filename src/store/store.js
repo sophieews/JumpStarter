@@ -19,11 +19,14 @@ export const store = new Vuex.Store({
         },
         getState: function(state) {
             return {
-                    "id": state.id,
-                    "token": state.token
-
+                "id": state.id,
+                "token": state.token
             }
+        },
+        getLoggedIn: function(state) {
+            return state.loggedIn;
         }
+
     },
 
     mutations: {

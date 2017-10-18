@@ -3,9 +3,7 @@
         <div class="container">
 
 
-            <div v-if="unauthorisedFlag == true">
-                <h1 style="text-align: center;"> Please login to make a pledge!</h1>
-            </div>
+
 
             <div class="row">
                 <div class="center">
@@ -22,13 +20,23 @@
                             <div class="col-lg-12">
                                 <form id="pledge-form" role="form" style="display: block;" v-on:submit.prevent>
                                     <div class="form-group">
-                                        <input type="text" name="amount" v-model="amount" tabindex="1" class="form-control" placeholder="Amount" >
+                                        <input type="number" min="1" name="amount" v-model="amount" tabindex="1" class="form-control" placeholder="Amount">
                                     </div>
                                     <div class="form-group">
                                         <input type="text" name="cardDetails" v-model="cardDetails" tabindex="2" class="form-control" placeholder="Credit Card Details">
                                     </div>
+                                    <input type="checkbox" v-model="anonymous" id="anonymous" name="anonymous" value="anonymous"> Anonymous <br>
+                                    <div v-if="unauthorisedFlag == true">
+                                        <p style="color: indianred;"> Please login to make a pledge!</p>
+                                    </div>
+                                    <div v-if="forbiddenFlag == true">
+                                        <p style="color: indianred;"> Sorry, you cannot pledge to your own project OR this project is no longer open to pledges</p>
+                                    </div>
+                                    <div class="col-xs-6 form-group pull-left">
+                                        <input type="submit" value="Cancel" v-on:click="cancel" tabindex="3" class="form-control btn btn-cancel">
+                                    </div>
                                     <div class="col-xs-6 form-group pull-right">
-                                        <input type="submit"  v-on:click="pledge" tabindex="3" class="form-control btn btn-login">
+                                        <input type="submit"  v-on:click="pledge" tabindex="4" class="form-control btn btn-login">
                                     </div>
                                 </form>
                             </div>
@@ -51,7 +59,8 @@
                 error: "",
                 unauthorisedFlag: false,
                 forbiddenFlag: false,
-                amount: 0,
+                amount: "",
+                anonymous: false,
                 cardDetails: ""
             }
         },
@@ -65,23 +74,24 @@
         methods: {
             pledge: function() {
                 const body = {
-                    "id": 3, //id of backer
-                    "amount": 100000.0,
-                    "anonymous": false,
+                    "id": this.$store.getters.getState.id, //id of backer
+                    "amount": parseInt(this.amount),
+                    "anonymous": this.anonymous,
                     "card": {
                         "authToken": "thisisatoken"
                     }
                 };
                 const options = {
                     headers: {
-                        'X-Authorization': 'dfc94c3f5d5a0ec74db962c261023d75',
+                        'X-Authorization': this.$store.getters.getState.token,
                         'Content-Type': 'application/json'
                     }
                 };
-                this.$http.post('http://localhost:4941/api/v2/projects/' + this.$route.params.id + '/pledge', body, options)
+                this.$http.post('http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + this.$route.params.id + '/pledge', body, options)
                     .then(function(response) {
                         console.log("Success")
                         console.log(response)
+                        history.go(-1);
                     }, function(error) {
                         if(error.status === 401) {
                             this.unauthorisedFlag = true;
@@ -94,6 +104,9 @@
                         this.error = error;
                     });
             },
+            cancel: function() {
+                history.go(-1);
+            }
         }
     }
 </script>

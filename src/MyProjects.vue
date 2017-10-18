@@ -11,10 +11,7 @@
             <div class="row" v-for="project in userProjects" style="margin-bottom: 20px;">
                     <div class="col-md-4">
                         <div class="img-wrapper" style="max-height:220px; max-width:400px; overflow: hidden;">
-                            <img class="img-responsive" v-bind:src="'http://localhost:4941/api/v2/projects/' + project.id +'/image'">
-                            <div class="edit">
-                                <a href="#"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-                            </div>
+                            <img class="img-responsive" v-bind:src="'http://csse-s365.canterbury.ac.nz:4817/api/v2/projects/' + project.id +'/image'">
                         </div>
                     </div>
 
@@ -58,7 +55,7 @@
         methods: {
             getUserProjects: function() {
                 const state = this.getState;
-                this.$http.get('http://localhost:4941/api/v2/projects?creator=' + state.id)
+                this.$http.get('http://csse-s365.canterbury.ac.nz:4817/api/v2/projects?creator=' + state.id)
                     .then(function(response) {
                         this.empty = response.body.length < 1;
                         this.userProjects = response.data;
@@ -110,14 +107,6 @@
     .photo-gallery .photos {
         padding-bottom:20px;
         margin: 0px auto;
-    }
-
-    .photo-gallery .item {
-        margin:13px;
-        width:30%;
-        height:305px;
-        padding: 0px 0px 30px;
-        background-color:#fefbfb;
     }
 
     .stylish-input-group .input-group-addon{
